@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wingo 30s - Plans</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 12px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 8px; }
+      th { background: #f2f2f2; text-align: left; }
+      .best { border: 2px solid #0a0; padding: 10px; margin-bottom: 12px; }
+      .muted { color: #666; }
+      .controls { margin-bottom: 12px; }
+      button { padding: 6px 10px; }
+    </style>
+  </head>
+  <body>
+    <h2>Wingo 30s Result</h2>
+    <div class="controls">
+      <button id="btn-result">Get Result</button>
+      <span id="status" class="muted"></span>
+    </div>
+    <div id="result" class="best" style="display:none"></div>
+    <script>
+      const statusEl = document.getElementById('status');
+      const resultEl = document.getElementById('result');
+
+      function pct(x){ return (x*100).toFixed(1) + '%'; }
+
+      async function getResult(){
+        const started = Date.now();
+        statusEl.textContent = ' Analyzing…';
+        try{
+          const res = await fetch('/api/result');
+          const data = await res.json();
+          const r = data.result || {};
+          if(r.decision){
+            resultEl.style.display = '';
+            const conf = r.confidence!=null ? pct(r.confidence) : '-';
+            resultEl.textContent = `Decision: ${r.decision} — Confidence ${conf}`;
+          } else {
+            resultEl.style.display = '';
+            resultEl.textContent = 'No decision available.';
+          }
+          statusEl.textContent = ` Done in ${Date.now() - started} ms`;
+        } catch(e){
+          statusEl.textContent = ' Error computing result';
+        }
+      }
+
+      document.getElementById('btn-result').addEventListener('click', getResult);
+    </script>
+  </body>
+  </html>
+
+
